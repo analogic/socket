@@ -99,8 +99,8 @@ class Socket {
         return $data;
     }
 
-    public function readLine() {
-        return $this->_readLine();
+    public function readLine($decrypt = false) {
+        return $this->_readLine($decrypt);
     }
 
     final protected function _read($size = null) {
@@ -111,9 +111,9 @@ class Socket {
         return $data;
     }
 
-    final protected function _readLine() {
+    final protected function _readLine($decrypt = false) {
         $data = @fgets($this->connection);
-        if ($data !== false && null !== $this->encryptor) {
+        if ($data !== false && null !== $this->encryptor && $decrypt) {
             $data = $this->encryptor->decrypt($data);
         }
         return $data;
