@@ -6,6 +6,6 @@
  * Time: 18:58
  */
 
-namespace qshurick\Socket\Exception;
+namespace Socket\Exception;
 
 class IOException extends ConnectionException {}

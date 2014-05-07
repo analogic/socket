@@ -6,7 +6,7 @@
  * Time: 21:10
  */
 
-namespace qshurick\Socket;
+namespace Socket;
 
 interface Encryptor {
     /**

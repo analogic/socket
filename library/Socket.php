@@ -6,7 +6,7 @@
  * Time: 21:03
  */
 
-namespace qshurick\Socket;
+namespace Socket;
 
 /**
  * Class Socket
@@ -23,7 +23,7 @@ class Socket {
      */
     protected $port;
     /**
-     * @var \qshurick\Socket\Encryptor
+     * @var \Socket\Encryptor
      */
     protected $encryptor;
 
@@ -35,8 +35,9 @@ class Socket {
     /**
      * @param $ip
      * @param $port
+     * @param Encryptor $encryptor
      */
-    public function __construct($ip, $port, \qshurick\Socket\Encryptor $encryptor = null) {
+    public function __construct($ip, $port, \Socket\Encryptor $encryptor = null) {
         $this->ip = $ip;
         $this->port = $port;
         $this->encryptor = $encryptor;
@@ -53,7 +54,7 @@ class Socket {
         );
         if (!$this->connection) {
             $errors = 'Socket connection not opened. '.$errorMessage."\n";
-            throw new \qshurick\Socket\Exception\ConnectionException($this->toString() . "\n" . $errors);
+            throw new \Socket\Exception\ConnectionException($this->toString() . "\n" . $errors);
         }
         $this->_postInit();
     }
@@ -65,9 +66,9 @@ class Socket {
     }
 
     /**
-     * @param \qshurick\Socket\Encryptor $encryptor
+     * @param \Socket\Encryptor $encryptor
      */
-    public function setEncryptor(\qshurick\Socket\Encryptor $encryptor) {
+    public function setEncryptor(\Socket\Encryptor $encryptor) {
         $this->encryptor = $encryptor;
     }
 
@@ -85,7 +86,7 @@ class Socket {
         }
         $result = @fputs($this->connection, $data);
         if (false === $result) {
-            throw new \qshurick\Socket\Exception\IOException($this->toString() . "\n" . $data);
+            throw new \Socket\Exception\IOException($this->toString() . "\n" . $data);
         }
     }
 

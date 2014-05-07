@@ -6,6 +6,6 @@
  * Time: 23:16
  */
 
-namespace qshurick\Socket\Exception;
+namespace Socket\Exception;
 
 class ConnectionException extends \HttpSocketException {}
