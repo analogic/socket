@@ -104,7 +104,16 @@ class Socket {
     }
 
     final protected function _read($size = null) {
-        $data = @fread($this->connection, $size);
+        $data = "";
+        $blockSize = 256;
+        if (null !== $size) {
+            while ($size > 0) {
+                $data .= @fread($this->connection, $blockSize < $size ? $blockSize : $size);
+                $size -= $blockSize;
+            }
+        } else {
+            $data = @fread($this->connection, $size);
+        }
         if ($data !== false && null !== $this->encryptor) {
             $data = $this->encryptor->decrypt($data);
         }
