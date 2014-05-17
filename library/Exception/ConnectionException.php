@@ -8,4 +8,4 @@
 
 namespace Socket\Exception;
 
-class ConnectionException extends \HttpSocketException {}
+class ConnectionException extends \Exception {}

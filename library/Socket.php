@@ -7,6 +7,7 @@
  */
 
 namespace Socket;
+use Socket\Exception\ConnectionException;
 
 /**
  * Class Socket
@@ -14,6 +15,8 @@ namespace Socket;
  */
 class Socket {
     const TIMEOUT = 5;
+    const SOCKET_SERVER = "server";
+    const SOCKET_CLIENT = "client";
     /**
      * @var string
      */
@@ -32,16 +35,39 @@ class Socket {
      */
     protected $connection;
 
+    protected $options;
+
     /**
      * @param $ip
      * @param $port
      * @param Encryptor $encryptor
      */
-    public function __construct($ip, $port, \Socket\Encryptor $encryptor = null) {
+    public function __construct($ip, $port, \Socket\Encryptor $encryptor = null, $type = self::SOCKET_CLIENT, $options = array()) {
         $this->ip = $ip;
         $this->port = $port;
         $this->encryptor = $encryptor;
-        $this->initConnection();
+        $this->options = $options;
+        if (self::SOCKET_CLIENT === $type) {
+            $this->initConnection();
+        } elseif (self::SOCKET_SERVER === $type) {
+            $this->initSocket();
+        } else {
+            throw new \Exception("Socket type '$type' undefined");
+        }
+    }
+
+    protected function initSocket() {
+        $domain = array_key_exists("domain", $this->options) ? $this->options['domain'] : AF_INET;
+        $type = array_key_exists("type", $this->options) ? $this->options['type'] : SOCK_STREAM;
+        $protocol = array_key_exists("protocol", $this->options) ? $this->options['protocol'] : SOL_UDP;
+
+        $socket = socket_create($domain, $type, $protocol);
+        if (false === $socket)
+            throw new ConnectionException("Can't create a socket");
+        if (!socket_bind($socket, $this->ip, $this->port))
+            throw new ConnectionException("Can't bind a socket");
+
+        $this->connection = $socket;
     }
 
     protected function initConnection() {
