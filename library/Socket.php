@@ -1,13 +1,12 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: aleksandr
- * Date: 04.05.14
- * Time: 21:03
+ * Original by: aleksandr 04.05.14 21:03
+ * Updated by: sh@analogic.cz
  */
 
 namespace Socket;
 use Socket\Exception\ConnectionException;
+use Socket\Exception\IOException;
 
 /**
  * Class Socket
@@ -41,12 +40,16 @@ class Socket {
      * @param $ip
      * @param $port
      * @param Encryptor $encryptor
+     * @param $type
+     * @param $options
+     * @throws \Exception
      */
-    public function __construct($ip, $port, \Socket\Encryptor $encryptor = null, $type = self::SOCKET_CLIENT, $options = array()) {
+    public function __construct($ip, $port, Encryptor $encryptor = null, $type = self::SOCKET_CLIENT, $options = array()) {
         $this->ip = $ip;
         $this->port = $port;
         $this->encryptor = $encryptor;
         $this->options = $options;
+
         if (self::SOCKET_CLIENT === $type) {
             $this->initConnection();
         } elseif (self::SOCKET_SERVER === $type) {
@@ -56,12 +59,17 @@ class Socket {
         }
     }
 
+    public function __toString() {
+        return __CLASS__ . " {ip:'$this->ip',port:'$this->port'}";
+    }
+
     protected function initSocket() {
         $domain = array_key_exists("domain", $this->options) ? $this->options['domain'] : AF_INET;
         $type = array_key_exists("type", $this->options) ? $this->options['type'] : SOCK_STREAM;
         $protocol = array_key_exists("protocol", $this->options) ? $this->options['protocol'] : SOL_UDP;
 
         $socket = socket_create($domain, $type, $protocol);
+
         if (false === $socket)
             throw new ConnectionException("Can't create a socket");
         if (!socket_bind($socket, $this->ip, $this->port))
@@ -80,39 +88,28 @@ class Socket {
         );
         if (!$this->connection) {
             $errors = 'Socket connection not opened. '.$errorMessage."\n";
-            throw new \Socket\Exception\ConnectionException($this->toString() . "\n" . $errors);
+            throw new ConnectionException($this->__toString() . " " . $errors);
         }
-        $this->_postInit();
-    }
-
-    protected function _postInit() {}
-
-    public function toString() {
-        return __CLASS__ . "{ip:'$this->ip',port:'$this->port',encryptor:'$this->encryptor'}";
     }
 
     /**
-     * @param \Socket\Encryptor $encryptor
+     * @param Encryptor $encryptor
      */
-    public function setEncryptor(\Socket\Encryptor $encryptor) {
+    public function setEncryptor(Encryptor $encryptor) {
         $this->encryptor = $encryptor;
     }
 
-
     /**
      * @param string $data
+     * @throws IOException
      */
     public function write($data) {
-        $this->_write($data);
-    }
-
-    final protected function _write($data) {
         if (null !== $this->encryptor) {
             $data = $this->encryptor->encrypt($data);
         }
         $result = @fputs($this->connection, $data);
         if (false === $result) {
-            throw new \Socket\Exception\IOException($this->toString() . "\n" . $data);
+            throw new IOException($this->__toString() . " " . $data);
         }
     }
 
@@ -121,15 +118,6 @@ class Socket {
      * @return string
      */
     public function read($size = null) {
-        $data = $this->_read($size);
-        return $data;
-    }
-
-    public function readLine($decrypt = false) {
-        return $this->_readLine($decrypt);
-    }
-
-    final protected function _read($size = null) {
         $data = "";
         $blockSize = 256;
         if (null !== $size) {
@@ -146,7 +134,7 @@ class Socket {
         return $data;
     }
 
-    final protected function _readLine($decrypt = false) {
+    public function readLine($decrypt = false) {
         $data = @fgets($this->connection);
         if ($data !== false && null !== $this->encryptor && $decrypt) {
             $data = $this->encryptor->decrypt($data);
@@ -154,5 +142,7 @@ class Socket {
         return $data;
     }
 
-
+    public function eof() {
+        return feof($this->connection);
+    }
 }

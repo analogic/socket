@@ -1,10 +1,14 @@
 {
-    "name": "qshurick/socket",
+    "name": "analogic/socket",
     "description": "Simple socket wrapper",
     "authors": [
         {
             "name": "qshurick",
             "email": "shu.rick.ifmo@gmail.com"
+        },
+        {
+            "name": "sh",
+            "email": "sh@analogic.cz"
         }
     ],
     "require": {
